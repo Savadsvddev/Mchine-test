@@ -1,9 +1,10 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import { BASE_URL } from "../Configuration";
 
 // ✅ Axios instance setup
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: BASE_URL,
   timeout: 20000,
 });
 

@@ -5,6 +5,7 @@ import { firestore } from "../../firebaseconfig";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import ClipLoader from "react-spinners/ClipLoader";
 import axiosInstance from "../../utils/AxiosInstance";
+import Header from "../../Header";
 
 function AddTask() {
   const navigate = useNavigate();
@@ -22,19 +23,14 @@ function AddTask() {
       setLoading(true);
       try {
         const taskId = state?.task?.id;
-        const res = await axiosInstance.put(
-          "http://localhost:3000/update-task",
-          { taskId, task, amount: Number(amount) },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axiosInstance.put("/update-task", {
+          taskId,
+          task,
+          amount: Number(amount),
+        });
         const data = res.data;
         toast.success("Task updated successfully!", data);
-        navigate("/task-list");
+        navigate("/");
       } catch (error) {
         toast.error("Error updating task", error);
       } finally {
@@ -43,23 +39,17 @@ function AddTask() {
     } else {
       setLoading(true);
       try {
-        const res = await axiosInstance.post(
-          "http://localhost:3000/add-task",
-          { task, amount: Number(amount) },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axiosInstance.post("/add-task", {
+          task,
+          amount: Number(amount),
+        });
 
         const data = res.data;
 
         console.log("Task added:", data);
         toast.success("Task added successfully");
         console.log("added");
-        navigate("/task-list");
+        navigate("/");
       } catch (error) {
         console.log("faileddd", error);
         toast.error("Error adding task");
@@ -71,75 +61,70 @@ function AddTask() {
 
   useEffect(() => {
     // Safely check if state exists
-    if (state?.task?.TASK ) {
+    if (state?.task?.TASK) {
       setTask(state.task.TASK);
     }
-    if (state?.task?.AMOUNT ) {
+    if (state?.task?.AMOUNT) {
       setAmount(state.task.AMOUNT);
     }
   }, [state]);
   console.log("state", state);
   return (
-    <div>
-      {/* Header */}
-      <div className="flex gap-6 p-4">
-        <div
-          className={`cursor-pointer ${
-            location.pathname === "/task-list"
-              ? "font-bold text-blue-600 underline"
-              : "text-gray-500"
-          }`}
-          onClick={() => navigate("/task-list")}
-        >
-          Task Listing
+    <div className="min-h-screen bg-gray-100">
+      {/* Top Navigation */}
+      <Header />
+
+      {/* Content */}
+      <div className="px-8 py-10">
+        <div className="w-full bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+            {state?.task ? "Edit Task Details" : "Create a New Task"}
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Task */}
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">
+                Task Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Grocery Shopping"
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition"
+              />
+            </div>
+
+            {/* Amount */}
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Amount</label>
+              <input
+                type="text"
+                placeholder="e.g. 1500"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition"
+              />
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <div className="flex justify-end mt-8">
+            <button
+              onClick={addTask}
+              className="px-6 h-10 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition flex items-center justify-center"
+            >
+              {loading ? (
+                <ClipLoader size={20} color="white" />
+              ) : state?.task ? (
+                "Update Task"
+              ) : (
+                "Add Task"
+              )}
+            </button>
+          </div>
         </div>
-
-        <div
-          className={`cursor-pointer ${
-            location.pathname === "/add-task"
-              ? "font-bold text-blue-600 underline"
-              : "text-gray-500"
-          }`}
-          onClick={() => navigate("/add-task")}
-        >
-          Add Task
-        </div>
-      </div>
-
-      {/* Input + Button */}
-      <div className="flex justify-center items-center mt-6">
-        <input
-          type="text"
-          placeholder="Enter Task"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          className="w-[200px] h-[30px] border border-black bg-white text-black pl-[10px] rounded outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
-        />
-
-        <input
-          placeholder="Enter Amount"
-          type="text"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="h-[30px] border border-black bg-white text-black pl-[10px] rounded outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 ml-4"
-        />
-
-        <button
-          className="ml-3 w-15 h-[30px] px-[5px] bg-blue-600 text-white text-sm flex items-center justify-center cursor-pointer"
-          onClick={addTask}
-        >
-          {state?.task ? (
-            loading ? (
-              <ClipLoader size={20} color="white" />
-            ) : (
-              "Update"
-            )
-          ) : loading ? (
-            <ClipLoader size={20} color="white" />
-          ) : (
-            "Add"
-          )}
-        </button>
       </div>
     </div>
   );

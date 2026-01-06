@@ -5,6 +5,8 @@ import { firestore } from "../../firebaseconfig";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
 import axiosInstance from "../../utils/AxiosInstance";
+import Header from "../../Header";
+import ClipLoader from "react-spinners/ClipLoader";
 
 function TaskList() {
   const db = firestore;
@@ -13,18 +15,18 @@ function TaskList() {
 
   const token = localStorage.getItem("authToken");
   const [taskList, setTaskList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchTasks = async () => {
+    setLoading(true);
     try {
-      const res = await axiosInstance.get("http://localhost:3000/tasks", {
-        headers: {
-          Authorization: `Bearer ${token}`, // pass token in headers
-        },
-      });
+      const res = await axiosInstance.get("/tasks");
       console.log("res", res);
       setTaskList(res.data?.tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,12 +37,9 @@ function TaskList() {
   const deleteTask = async (taskId) => {
     try {
       const res = await axiosInstance.delete(
-        "http://localhost:3000/delete-tasks",
+        "/delete-tasks",
 
         {
-          headers: {
-            Authorization: `Bearer ${token}`, // pass token in headers
-          },
           data: { taskId },
         }
       );
@@ -57,86 +56,86 @@ function TaskList() {
   };
   console.log("list", taskList);
   return (
-    <div className="p-4">
-      <div className="flex justify-evenly items-center px-[30px] py-[20px]">
-        <div
-          className={`cursor-pointer ${
-            location?.pathname === "/task-list"
-              ? "text-blue-600 underline"
-              : "text-black"
-          }`}
-          onClick={() => navigate("/task-list")}
-        >
-          Task Listing
-        </div>
+    <div className="min-h-screen bg-gray-100">
+      <Header />
 
-        <div
-          className={`cursor-pointer ${
-            location?.pathname === "/add-task"
-              ? "text-blue-600 underline"
-              : "text-black"
-          }`}
-          onClick={() => navigate("/add-task")}
-        >
-          Add Task
+      {/* Content */}
+      <div className="px-8 py-8">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-5 py-3 text-left text-sm font-medium text-gray-600">
+                  #
+                </th>
+                <th className="px-5 py-3 text-left text-sm font-medium text-gray-600">
+                  Task
+                </th>
+                <th className="px-5 py-3 text-left text-sm font-medium text-gray-600">
+                  Amount
+                </th>
+                <th className="px-5 py-3 text-left text-sm font-medium text-gray-600">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="py-6">
+                    <div className="flex justify-center">
+                      <ClipLoader size={30} />
+                    </div>
+                  </td>
+                </tr>
+              ) : taskList.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="text-center py-6 text-sm text-gray-500"
+                  >
+                    No tasks available. Click “Add Task” to create one.
+                  </td>
+                </tr>
+              ) : (
+                taskList.map((t, index) => (
+                  <tr
+                    key={t.id}
+                    className="border-t hover:bg-gray-50 transition"
+                  >
+                    <td className="px-5 py-3 text-sm text-gray-700">
+                      {index + 1}
+                    </td>
+                    <td className="px-5 py-3 text-sm font-medium text-gray-800">
+                      {t.TASK}
+                    </td>
+                    <td className="px-5 py-3 text-sm text-gray-700">
+                      ₹ {t.AMOUNT}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleEditTask(t)}
+                          className="p-2 rounded-full bg-blue-50 hover:bg-blue-100"
+                        >
+                          <FaEdit className="text-blue-600 text-sm" />
+                        </button>
+                        <button
+                          onClick={() => deleteTask(t.id)}
+                          className="p-2 rounded-full bg-red-50 hover:bg-red-100"
+                        >
+                          <FaTrash className="text-red-600 text-sm" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      {/* Table */}
-      <table className="w-full border-collapse">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 bg-gray-100 p-2 text-left">
-              SI No
-            </th>
-            <th className="border border-gray-300 bg-gray-100 p-2 text-left">
-              Task
-            </th>
-            <th className="border border-gray-300 bg-gray-100 p-2 text-left">
-              Amount
-            </th>
-            <th className="border border-gray-300 bg-gray-100 p-2 text-left">
-              Actions
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {taskList.length === 0 && (
-            <tr>
-              <td
-                colSpan="3"
-                className="p-[10px] text-center border border-gray-300"
-              >
-                No tasks yet
-              </td>
-            </tr>
-          )}
-
-          {taskList.map((t, index) => (
-            <tr key={index}>
-              <td className="border border-gray-300 p-2">{index + 1}</td>
-              <td className="border border-gray-300 p-2">{t.TASK}</td>
-              <td className="border border-gray-300 p-2">{t.AMOUNT}</td>
-              <td className="border border-gray-300 p-2">
-                <button
-                  className="cursor-pointer bg-transparent border-none"
-                  onClick={() => deleteTask(t?.id)}
-                >
-                  <FaTrash className="text-red-500" />
-                </button>
-
-                <button
-                  className="ml-[5px] cursor-pointer bg-transparent border-none"
-                  onClick={() => handleEditTask(t)}
-                >
-                  <FaEdit className="text-blue-500" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }

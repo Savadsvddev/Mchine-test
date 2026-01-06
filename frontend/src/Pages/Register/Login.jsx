@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 
-function SIgnUp() {
+function Login() {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -30,14 +30,14 @@ function SIgnUp() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Sign Up failed");
+        toast.error(data.message || "Login failed");
       } else {
-        localStorage.setItem("authToken", (data?.token));
+        localStorage.setItem("authToken", data?.token);
 
         // console.log("dataaa", data);
 
-        toast.success("Sign Up successful!");
-        navigate("/home");
+        toast.success("Login successful!");
+        navigate("/");
       }
     } catch (err) {
       setError(err.message);
@@ -46,54 +46,67 @@ function SIgnUp() {
     }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+
+    if (token) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
   return (
-    <div className=" h-screen flex items-center justify-center">
-      <div className="bg-white w-1/4 h-50 p-3 shadow-lg">
-        <h3 className="text-center font-bold text-blue-600 text-base">
-          SignUp
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300">
+      <div className="bg-white w-[90%] sm:w-[380px] rounded-xl shadow-xl p-6">
+        <h3 className="text-center font-semibold text-blue-600 text-lg mb-5">
+          Login
         </h3>
-        <div className="flex flex-col gap-2.5">
-          <div className="flex flex-col items-start">
-            <label className="text-center text-gray-600 text-sm">
-              Number <span style={{ color: "red" }}>*</span>
+
+        <div className="flex flex-col gap-4">
+          {/* Phone Number */}
+          <div className="flex flex-col">
+            <label className="text-gray-600 text-sm mb-1">
+              Phone Number <span className="text-red-500">*</span>
             </label>
             <input
               placeholder="Enter Number"
               type="text"
-              className="pl-2.5 w-full rounded outline-none border-[1px] border-solid border-gray-400 text-md focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+              className="px-3 py-2 rounded-md outline-none border border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
               value={phone}
               onChange={(e) => {
                 const value = e.target.value;
-                // Allow only digits and max length 10
                 if (/^\d*$/.test(value) && value.length <= 10) {
                   setPhone(value);
                 }
               }}
             />
           </div>
-          <div className="flex flex-col items-start relative">
-            <label className="text-center text-gray-600 text-sm">
-              Password <span style={{ color: "red" }}>*</span>
+
+          {/* Password */}
+          <div className="flex flex-col relative">
+            <label className="text-gray-600 text-sm mb-1">
+              Password <span className="text-red-500">*</span>
             </label>
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
-              className="pl-2.5 w-full rounded outline-none border-[1px] border-solid border-gray-400 text-md focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+              className="px-3 py-2 rounded-md outline-none border border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition pr-10"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
             <span
-              className="absolute right-3 top-1/2 cursor-pointer text-gray-500"
+              className="absolute right-3 top-[38px] cursor-pointer text-gray-500 hover:text-blue-500 transition"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
             </span>
           </div>
+
+          {/* Button */}
           <button
-            className="w-full bg-blue-500 h-7 text-white rounded cursor-pointer  hover:bg-blue-600 "
+            className="w-full bg-blue-500 h-10 text-white rounded-md font-medium hover:bg-blue-600 transition flex items-center justify-center"
             onClick={handleLogin}
           >
-            {loading ? <ClipLoader color="white" size={20} /> : "Sign Up"}
+            {loading ? <ClipLoader color="white" size={20} /> : "Login"}
           </button>
         </div>
       </div>
@@ -101,4 +114,4 @@ function SIgnUp() {
   );
 }
 
-export default SIgnUp;
+export default Login;

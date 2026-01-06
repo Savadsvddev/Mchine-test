@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { firestore } from "../../firebaseconfig";
@@ -40,7 +40,7 @@ function Register() {
 
       toast.success("User created successfully");
 
-      navigate("/signup");
+      navigate("/login");
     } catch (err) {
       console.error(err);
       toast.error("Failed to create user.");
@@ -49,88 +49,108 @@ function Register() {
     }
   };
 
+
+   useEffect(() => {
+      const token = localStorage.getItem("authToken");
+  
+      if (token) {
+        navigate("/", { replace: true });
+      }
+    }, [navigate]);
+
   return (
-    <div className=" h-screen flex items-center justify-center">
-      <div className="bg-white w-1/4 h-75 p-3 shadow-lg">
-        <h3 className="text-center font-bold text-blue-600 text-base">
-          Register
-        </h3>
-        <div className="flex flex-col gap-2.5">
-          <div className="flex flex-col items-start">
-            <label className="text-center text-gray-600 text-sm">
-              Name <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              placeholder="Enter Name"
-              type="text"
-              className="pl-2.5 w-full rounded outline-none border-[1px] border-solid border-gray-400 text-md focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col items-start">
-            <label className="text-center text-gray-600 text-sm">
-              Number <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              placeholder="Enter Number"
-              type="text"
-              className="pl-2.5 w-full rounded outline-none border-[1px] border-solid border-gray-400 text-md focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
-              value={number}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Allow only digits and max length 10
-                if (/^\d*$/.test(value) && value.length <= 10) {
-                  setNumber(value);
-                }
-              }}
-            />
-          </div>
-          <div className="flex flex-col items-start relative">
-            <label className="text-center text-gray-600 text-sm">
-              Password <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter Password"
-              className="pl-2.5 w-full rounded outline-none border-[1px] border-solid border-gray-400 text-md focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <span
-              className="absolute right-3 top-1/2 cursor-pointer text-gray-500"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
-            </span>
-          </div>
-          <div className="flex flex-col items-start relative">
-            <label className="text-center text-gray-600 text-sm">
-              Confirm Password <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              placeholder="Confirm Password"
-              type={showConfirmPassword ? "text" : "password"}
-              className="pl-2.5 w-full rounded outline-none border-[1px] border-solid border-gray-400 text-md focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <span
-              className="absolute right-3 top-1/2 cursor-pointer text-gray-500"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? <FaRegEyeSlash /> : <FaRegEye />}
-            </span>
-          </div>
-          <button
-            className="w-full bg-blue-500 h-7 text-white rounded cursor-pointer  hover:bg-blue-600 "
-            onClick={handleSignup}
-          >
-            {loading ? <ClipLoader color="white" size={20} /> : "Register"}
-          </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300">
+    <div className="bg-white w-[90%] sm:w-[420px] rounded-xl shadow-xl p-6">
+      <h3 className="text-center font-semibold text-blue-600 text-lg mb-5">
+        Register
+      </h3>
+
+      <div className="flex flex-col gap-4">
+        {/* Name */}
+        <div className="flex flex-col">
+          <label className="text-gray-600 text-sm mb-1">
+            Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            placeholder="Enter Name"
+            type="text"
+            className="px-3 py-2 rounded-md outline-none border border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
+
+        {/* Number */}
+        <div className="flex flex-col">
+          <label className="text-gray-600 text-sm mb-1">
+            Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            placeholder="Enter Number"
+            type="text"
+            className="px-3 py-2 rounded-md outline-none border border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+            value={number}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*$/.test(value) && value.length <= 10) {
+                setNumber(value);
+              }
+            }}
+          />
+        </div>
+
+        {/* Password */}
+        <div className="flex flex-col relative">
+          <label className="text-gray-600 text-sm mb-1">
+            Password <span className="text-red-500">*</span>
+          </label>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter Password"
+            className="px-3 py-2 rounded-md outline-none border border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition pr-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <span
+            className="absolute right-3 top-[38px] cursor-pointer text-gray-500 hover:text-blue-500 transition"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+          </span>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="flex flex-col relative">
+          <label className="text-gray-600 text-sm mb-1">
+            Confirm Password <span className="text-red-500">*</span>
+          </label>
+          <input
+            placeholder="Confirm Password"
+            type={showConfirmPassword ? "text" : "password"}
+            className="px-3 py-2 rounded-md outline-none border border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition pr-10"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <span
+            className="absolute right-3 top-[38px] cursor-pointer text-gray-500 hover:text-blue-500 transition"
+            onClick={() =>
+              setShowConfirmPassword(!showConfirmPassword)
+            }
+          >
+            {showConfirmPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+          </span>
+        </div>
+
+        {/* Button */}
+        <button
+          className="w-full bg-blue-500 h-10 text-white rounded-md font-medium hover:bg-blue-600 transition flex items-center justify-center"
+          onClick={handleSignup}
+        >
+          {loading ? <ClipLoader color="white" size={20} /> : "Register"}
+        </button>
       </div>
     </div>
+  </div>
   );
 }
 
