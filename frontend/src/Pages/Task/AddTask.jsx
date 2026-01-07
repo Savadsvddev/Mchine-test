@@ -89,7 +89,7 @@ function AddTask() {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Grocery Shopping"
+                placeholder="e.g. Task"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition"
